@@ -32,7 +32,7 @@ El sistema sigue un esquema maestro-esclavo: el STM32 (esclavo) muestrea los sen
 
 ## Firmware del STM32 (`daq_stm.ino`)
 
-Lazo principal sin RTOS que adquiere los sensores cada 20 ms (50 Hz). El encoder y el SPI se atienden por interrupciones.
+Lazo principal que adquiere los sensores cada 20 ms (50 Hz). El encoder y el SPI se atienden por interrupciones.
 
 ### Sensores y pines
 
