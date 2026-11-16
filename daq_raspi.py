@@ -294,17 +294,17 @@ _fallos_consecutivos_stm = {k: 0 for k in STM_CAMPOS}
 MAX_FALLOS_STICKY = 25  # ~1 s de fallas antes de dar el sensor por muerto
 
 STM_LIMITES = {
-    "angulo":       {"min": -4500, "max": 4500,   "delta_max": 200},     # °
+    "angulo":       {"min": -360, "max": 360,   "delta_max": 200},     # °
     "acel_lateral": {"min": -10,   "max": 10,     "delta_max": 5},       # g
-    "acel_x":       {"min": -16,   "max": 16,     "delta_max": 80},      # g
-    "acel_y":       {"min": -16,   "max": 16,     "delta_max": 80},      # g
-    "acel_z":       {"min": -16,   "max": 16,     "delta_max": 80},      # g
+    "acel_x":       {"min": -40,   "max": 40,     "delta_max": 8},      # g
+    "acel_y":       {"min": -40,   "max": 40,     "delta_max": 8},      # g
+    "acel_z":       {"min": -40,   "max": 40,     "delta_max": 8},      # g
     "giro_x":       {"min": -2000, "max": 2000,   "delta_max": 1000},    # °/s
     "giro_y":       {"min": -2000, "max": 2000,   "delta_max": 1000},    # °/s
     "giro_z":       {"min": -2000, "max": 2000,   "delta_max": 1000},    # °/s
-    "dx1":          {"min": 0,     "max": 150,    "delta_max": 60},      # mm
-    "dx2":          {"min": 0,     "max": 150,    "delta_max": 60},      # mm
-    "dx3":          {"min": 0,     "max": 150,    "delta_max": 60},      # mm
+    "dx1":          {"min": 0,     "max": 75,    "delta_max": 30},      # mm
+    "dx2":          {"min": 0,     "max": 75,    "delta_max": 30},      # mm
+    "dx3":          {"min": 0,     "max": 75,    "delta_max": 30},      # mm
     "marcha":       {"min": 0,     "max": 6,      "delta_max": 2},       # 0 = neutro
     "stm_presion1": {"min": 0.0,   "max": 2000.0, "delta_max": 1200.0},  # PSI
     "stm_presion2": {"min": 0.0,   "max": 2000.0, "delta_max": 1200.0},  # PSI
