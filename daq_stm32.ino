@@ -4,9 +4,9 @@
 #include <SPI.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
-#include <VL53L0X.h>
+
 #include <Wire.h>
-#include <TinyGPS.h>
+
 #include <libmaple/iwdg.h>
 
 #include <libmaple/spi.h>
@@ -81,27 +81,19 @@ int estado_actual = -1;         // último cambio confirmado
 int candidato = -2;             // valor en evaluación
 int contador_confirmacion = 0;  // veces seguidas que se repitió el candidato
 
-//====================================================
-//                      GPS
-//====================================================
-TinyGPS gps;
-volatile bool newData = false;
 
 //====================================================
 //                EXTENSÓMETROS
 //====================================================
-#define NUM_EXTENSOMETROS 5
-
 const float DMIN    =   0.0f;
-float       DMAX    =  75.0f;   // se puede cambiar por comando (código 3)
+float       DMAX    =  75.0f;   
 const float DFIJO   =   0.0f;
 const float K_ELAST =  35.0f;
 
 const int PIN_EXT1 = PA6;
 const int PIN_EXT2 = PA5;
 const int PIN_EXT3 = PB1;
-const int PIN_EXT4 = PA3;
-const int PIN_EXT5 = PB0;
+
 
 //====================================================
 //                      IMU
@@ -124,7 +116,7 @@ const float GRADOS_A_RAD = 0.0174f;
 const float OFFSET_GX = 0.32f  * GRADOS_A_RAD;
 const float OFFSET_GY = -0.01f * GRADOS_A_RAD;
 const float OFFSET_GZ = 0.0f;
-float OFFSET_LONGITUDINAL  = 0;      // se puede cambiar por comando (código 1)
+float OFFSET_LONGITUDINAL  = 0;     
 
 float acel_lateral_g = 0.0f;
 float acel_long_g    = 0.0f;
@@ -157,7 +149,6 @@ int pin_presion2 = PA2;
 //====================================================
 void setup() {
   Serial.begin(115200);
-  Serial3.begin(9600);
 
   // Avisa si el último reinicio fue por watchdog
   if (RCC_BASE->CSR & RCC_CSR_IWDGRSTF) {
@@ -238,9 +229,9 @@ void loop() {
     }
 
     //--- Extensómetros ---
-    float dx1 = leerExtensometro(PIN_EXT1, 0);
-    float dx2 = leerExtensometro(PIN_EXT2, 1);
-    float dx3 = leerExtensometro(PIN_EXT3, 2);
+    float dx1 = leerExtensometro(PIN_EXT1);
+    float dx2 = leerExtensometro(PIN_EXT2);
+    float dx3 = leerExtensometro(PIN_EXT3);
 
     //--- Cambios ---
     uint16_t cambio_adc = analogRead(pin_cambios);
@@ -529,51 +520,18 @@ void calcularFuerzasG(float Ax, float Ay, float Az, float &lat, float &lon) {
   lon = (ax_lin / 9.81f) - OFFSET_LONGITUDINAL;
 }
 
-float leerExtensometro(int pin, int id) {
-    const float ALPHA = 0.5;
-    static float filtrado[NUM_EXTENSOMETROS] = {0};
-    static int inicializado[NUM_EXTENSOMETROS] = {0};
-
+float leerExtensometro(int pin) {
     int raw = analogRead(pin);
-
-    if (!inicializado[id]) {
-        filtrado[id] = (float)raw;
-        inicializado[id] = 1;
-    } else {
-        filtrado[id] += ALPHA * ((float)raw - filtrado[id]);
-    }
-
     float dmed = DMIN + (DMAX - DMIN) * (4095.0f - raw) / 4095.0f;
     return dmed;
 }
 
-float calcularAceleracionLateral(float Ax, float Ay, float Az) {
-  float pitch  = atan2f(-Ax, sqrtf(Ay * Ay + Az * Az));
-  float roll   = atan2f(Ay, Az);
-  float gy     = 9.81f * sinf(roll) * cosf(pitch);
-  float ay_lin = Ay - gy;
-  return (ay_lin / 9.81f) - OFFSET_LATERAL;
-}
 
 void encoderISR() {
   if (digitalRead(PIN_ENCODER_B) == HIGH) pulsos = pulsos + 1;
   else                                    pulsos = pulsos - 1;
 }
 
-bool esTransicionValida(int desde, int hacia) {
-  if (desde == -1) return true;
-  if (desde == hacia) return true;
-  switch (desde) {
-    case 0: return (hacia == 1 || hacia == 2);
-    case 1: return (hacia == 0 || hacia == 2);
-    case 2: return (hacia == 0 || hacia == 1 || hacia == 3);
-    case 3: return (hacia == 2 || hacia == 4);
-    case 4: return (hacia == 3 || hacia == 5);
-    case 5: return (hacia == 4 || hacia == 6);
-    case 6: return (hacia == 5);
-    default: return false;
-  }
-}
 
 int clasificar_lectura(int valor) {
   if (valor >= (t1 - TOLERANCIA) && valor <= (t1 + TOLERANCIA)) return 1;
