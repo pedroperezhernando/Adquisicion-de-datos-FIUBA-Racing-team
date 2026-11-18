@@ -294,7 +294,7 @@ _fallos_consecutivos_stm = {k: 0 for k in STM_CAMPOS}
 MAX_FALLOS_STICKY = 25  # ~1 s de fallas antes de dar el sensor por muerto
 
 STM_LIMITES = {
-    "angulo":       {"min": -360, "max": 360,   "delta_max": 200},     # °
+    "angulo":       {"min": -360, "max": 360,   "delta_max": 20},     # °
     "acel_lateral": {"min": -10,   "max": 10,     "delta_max": 5},       # g
     "acel_x":       {"min": -40,   "max": 40,     "delta_max": 8},      # g
     "acel_y":       {"min": -40,   "max": 40,     "delta_max": 8},      # g
