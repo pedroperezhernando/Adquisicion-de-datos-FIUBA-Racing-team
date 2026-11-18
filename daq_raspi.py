@@ -109,7 +109,6 @@ CAN_BITRATE = 1_000_000
 # Un bus, un hilo RX y un hilo TX, sin recuperación automática.
 
 CAN_ID_MOTOR       = 0x640
-CAN_ID_PRES_ACEITE = 0x644
 CAN_ID_TEMPS       = 0x649
 CAN_ID_MARCHA      = 0x64D
 CAN_ID_LAMBDA      = 0x460
@@ -126,9 +125,7 @@ CAN_ID_NEUMATICO_TD = 0x3FC  # trasera derecha
 #Variables para decodificar las tramas de la ecu
 SIG_RPM         = {'off': 0, 'len': 2, 'mask': 0xFFFF, 'mult': 1,    'div': 1,    'add': 0}
 SIG_TPS         = {'off': 6, 'len': 2, 'mask': 0xFFFF, 'mult': 1,    'div': 10,   'add': 0}
-SIG_PRES_ACEITE = {'off': 6, 'len': 2, 'mask': 0xFFFF, 'mult': 1000, 'div': 1,    'add': 0}
 SIG_TEMP_REFRIG = {'off': 0, 'len': 1, 'mask': 0xFF,   'mult': 1,    'div': 1,    'add': 40}
-SIG_TEMP_AIRE   = {'off': 1, 'len': 1, 'mask': 0xFF,   'mult': 1,    'div': 1,    'add': 40}
 SIG_MARCHA      = {'off': 6, 'len': 1, 'mask': 0x0F,   'mult': 1,    'div': 1,    'add': 0}
 SIG_BATERIA     = {'off': 5, 'len': 1, 'mask': 0xFF,   'mult': 1,    'div': 10,   'add': 0}
 SIG_LAMBDA      = {'off': 0, 'len': 2, 'mask': 0xFFFF, 'mult': 1000, 'div': 1,    'add': 0}
@@ -158,8 +155,7 @@ CSV_COLUMNAS = [
     "dx1", "dx2", "dx3",
     "stm_presion1", "stm_presion2",
     "rpm", "tps", "afr",
-    "temp_refrigerante", "temp_aire",
-    "presion_aceite", "bateria_v",
+    "temp_refrigerante", "bateria_v",
     "gps_lat", "gps_lon", "gps_vel_kmh",
     "temp_neumatico_di", "temp_neumatico_dd", "temp_neumatico_ti", "temp_neumatico_td",
 ]
@@ -167,8 +163,7 @@ CSV_COLUMNAS = [
 STM_CAMPOS = ["marcha", "angulo", "acel_lateral", "acel_x", "acel_y", "acel_z",
               "giro_x", "giro_y", "giro_z", "dx1", "dx2", "dx3",
               "stm_presion1", "stm_presion2"]
-ECU_CAMPOS = ["rpm", "tps", "afr", "temp_refrigerante", "temp_aire",
-              "presion_aceite", "bateria_v"]
+ECU_CAMPOS = ["rpm", "tps", "afr", "temp_refrigerante", "bateria_v"]
 GPS_CAMPOS = ["gps_lat", "gps_lon", "gps_vel_kmh"]
 NEUMATICO_CAMPOS = ["temp_neumatico_di", "temp_neumatico_dd", "temp_neumatico_ti", "temp_neumatico_td"]
 
@@ -234,8 +229,7 @@ def leer_neumaticos():
 _lock_ecu = threading.Lock()
 _estado_ecu = {
     "rpm": None, "tps": None, "afr": None,
-    "temp_refrigerante": None, "temp_aire": None,
-    "presion_aceite": None, "bateria_v": None,
+    "temp_refrigerante": None, "bateria_v": None,
 }
 _ultimo_ecu_ts = 0.0
 
@@ -448,14 +442,12 @@ def _decodificar_ecu(payload):
         afr        = struct.unpack_from('B',  payload, 10)[0] / 10.0
         tps        = struct.unpack_from('>h', payload, 14)[0] / 10.0
         temp_motor = struct.unpack_from('>h', payload, 18)[0] / 10.0
-        temp_aire  = struct.unpack_from('>h', payload, 20)[0] / 10.0
         vbat       = struct.unpack_from('>h', payload, 22)[0] / 100.0
     except struct.error:
         return None
     return {
         "rpm": rpm, "tps": tps, "afr": afr,
-        "temp_refrigerante": temp_motor, "temp_aire": temp_aire,
-        "presion_aceite": 0,
+        "temp_refrigerante": temp_motor,
         "bateria_v": vbat,
     }
 
@@ -925,17 +917,14 @@ def enviar_can(bus_can, ecu, marcha):
         bus_can.send(can.Message(arbitration_id=can_id, data=payload, is_extended_id=False))
 
     datos_ecu = {
-        'rpm': 0, 'tps': 0, 'afr': 0, 'temp_refrigerante': 0,
-        'temp_aire': 0, 'bateria_v': 0, 'presion_aceite': 0
+        'rpm': 0, 'tps': 0, 'afr': 0, 'temp_refrigerante': 0, 'bateria_v': 0
     }
     if ecu is not None:
         datos_ecu.update(ecu)
 
     enviar(CAN_ID_MOTOR,       [(datos_ecu['rpm'], SIG_RPM), (datos_ecu['tps'], SIG_TPS)])
     enviar(CAN_ID_TEMPS,       [(datos_ecu['temp_refrigerante'], SIG_TEMP_REFRIG),
-                                (datos_ecu['temp_aire'], SIG_TEMP_AIRE),
                                 (datos_ecu['bateria_v'], SIG_BATERIA)])
-    enviar(CAN_ID_PRES_ACEITE, [(datos_ecu['presion_aceite'], SIG_PRES_ACEITE)])
     enviar(CAN_ID_MARCHA,      [(marcha, SIG_MARCHA)])
     enviar(CAN_ID_LAMBDA,      [(datos_ecu['afr'], SIG_LAMBDA)])
 
@@ -1023,8 +1012,6 @@ def mostrar_consola(estado):
     print(f"  {'TPS':<22}  {_fmt(estado.get('tps'), 1)}  %")
     print(f"  {'AFR':<22}  {_fmt(estado.get('afr'), 1)}")
     print(f"  {'Temp. refrigerante':<22}  {_fmt(estado.get('temp_refrigerante'))}  °C")
-    print(f"  {'Temp. aire':<22}  {_fmt(estado.get('temp_aire'))}  °C")
-    print(f"  {'Presión aceite':<22}  {_fmt(estado.get('presion_aceite'), 0)}")
     print(f"  {'Batería':<22}  {_fmt(estado.get('bateria_v'), 2)}  V")
     print(f"  {c_ecu}{'ECU':<22}  {'OK' if ecu_ok else 'SIN DATOS'}{RESET}")
 
