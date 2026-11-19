@@ -290,12 +290,12 @@ MAX_FALLOS_STICKY = 25  # ~1 s de fallas antes de dar el sensor por muerto
 STM_LIMITES = {
     "angulo":       {"min": -360, "max": 360,   "delta_max": 20},     # °
     "acel_lateral": {"min": -10,   "max": 10,     "delta_max": 5},       # g
-    "acel_x":       {"min": -40,   "max": 40,     "delta_max": 8},      # g
-    "acel_y":       {"min": -40,   "max": 40,     "delta_max": 8},      # g
-    "acel_z":       {"min": -40,   "max": 40,     "delta_max": 8},      # g
-    "giro_x":       {"min": -2000, "max": 2000,   "delta_max": 1000},    # °/s
-    "giro_y":       {"min": -2000, "max": 2000,   "delta_max": 1000},    # °/s
-    "giro_z":       {"min": -2000, "max": 2000,   "delta_max": 1000},    # °/s
+    "acel_x":       {"min": -40,   "max": 40,     "delta_max": 8},      # m/s²
+    "acel_y":       {"min": -40,   "max": 40,     "delta_max": 8},      # m/s²
+    "acel_z":       {"min": -40,   "max": 40,     "delta_max": 8},      # m/s²
+    "giro_x":       {"min": -2000, "max": 2000,   "delta_max": 1000},    # rad/s
+    "giro_y":       {"min": -2000, "max": 2000,   "delta_max": 1000},    # rad/s
+    "giro_z":       {"min": -2000, "max": 2000,   "delta_max": 1000},    # rad/s
     "dx1":          {"min": 0,     "max": 75,    "delta_max": 30},      # mm
     "dx2":          {"min": 0,     "max": 75,    "delta_max": 30},      # mm
     "dx3":          {"min": 0,     "max": 75,    "delta_max": 30},      # mm
