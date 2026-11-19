@@ -106,15 +106,13 @@ const uint32_t IMU_REINTENTO_MS = 2000; // reintento de conexión si está offli
 
 const float OFFSET_LATERAL = 0.06f;
 
-// Offsets de la IMU medidos en reposo sobre la base nivelada (informe, Tabla tab:resultados_imu).
-// Se restan a la lectura cruda. Acelerómetro en m/s²; en reposo Z debe leer 9,81.
+// acelerómetro en m/s² y giróscopo en rad/s.
 const float OFFSET_AX = 0.43f;
 const float OFFSET_AY = 0.18f;
 const float OFFSET_AZ = 9.05f - 9.81f;
-// Giróscopo: la tabla está en °/s y la librería entrega rad/s.
-const float GRADOS_A_RAD = 0.0174f;
-const float OFFSET_GX = 0.32f  * GRADOS_A_RAD;
-const float OFFSET_GY = -0.01f * GRADOS_A_RAD;
+//en rad/s
+const float OFFSET_GX = 0.32f;
+const float OFFSET_GY = -0.01f;
 const float OFFSET_GZ = 0.0f;
 float OFFSET_LONGITUDINAL  = 0;     
 
